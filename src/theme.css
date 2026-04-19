@@ -1,0 +1,84 @@
+:root {
+  --ocean:       #0288D1;
+  --ocean-deep:  #01579B;
+  --ocean-dark:  #0D1B4B;
+  --jungle:      #2E7D32;
+  --jungle-mid:  #388E3C;
+  --sand:        #E8A020;
+  --sand-light:  #FFF8E7;
+  --coral:       #D84315;
+  --white:       #ffffff;
+  --muted:       rgba(255,255,255,0.65);
+  --card:        rgba(255,255,255,0.08);
+  --border:      rgba(255,255,255,0.14);
+  --radius:      20px;
+  --radius-sm:   12px;
+  --shadow:      0 8px 32px rgba(0,0,0,0.45);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  font-family: 'Georgia', serif;
+  background: var(--ocean-dark);
+  color: var(--white);
+}
+
+#root {
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  background: var(--ocean-dark);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active { transform: scale(0.96); opacity: 0.85; }
+
+input {
+  font-family: inherit;
+  outline: none;
+}
+
+/* Pulse animation for unlocked location markers */
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+  70%  { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+
+.marker-pulse { animation: pulse-ring 2s ease-out infinite; }
+
+/* Drawer slide-up */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.drawer { animation: slide-up 0.28s cubic-bezier(0.32,0.72,0,1); }
+
+/* Fade-in backdrop */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.backdrop { animation: fade-in 0.2s ease; }

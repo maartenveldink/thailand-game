@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sL \"https://cdn.jsdelivr.net/npm/phaser@3.88.2/dist/phaser.min.js\" -o lib/phaser.min.js)",
+      "Bash(python make_icons.py)",
+      "Bash(curl -s \"http://localhost:8080/js/config.js\")",
+      "Bash(curl -s \"http://localhost:8080/lib/phaser.min.js\")",
+      "Bash(curl -s \"http://localhost:8080/icons/icon-192.png\")",
+      "Bash(export PATH=\"$PATH:/c/Program Files/nodejs\")",
+      "Bash(python -m pytest tests/test_game.py -v)",
+      "Bash(python -m pytest tests/test_game.py::TestBangkokQuiz tests/test_game.py::TestMapScreen -v)",
+      "Bash(python -m pytest tests/ -v)"
+    ]
+  }
+}

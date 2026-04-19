@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0288D1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <title>Thailand Avontuur 🇹🇭</title>
+    <!-- Phaser engine + game globals (loaded before React) -->
+    <script src="/lib/phaser.min.js"></script>
+    <script src="/js/config.js"></script>
+    <script src="/js/save.js"></script>
+    <script src="/js/utils/draw.js"></script>
+    <script src="/js/utils/audio.js"></script>
+    <!-- Phaser game scenes -->
+    <script src="/js/scenes/StoryScene.js"></script>
+    <script src="/js/scenes/WinScene.js"></script>
+    <script src="/js/scenes/games/BangkokMapGame.js"></script>
+    <script src="/js/scenes/games/KanchanaburiMemory.js"></script>
+    <script src="/js/scenes/games/TrainReflexGame.js"></script>
+    <script src="/js/scenes/games/KhaoSokPuzzle.js"></script>
+    <script src="/js/scenes/games/LakeRaftGame.js"></script>
+    <script src="/js/scenes/games/SamuiBeachGame.js"></script>
+    <script src="/js/scenes/games/BangkokFinalGame.js"></script>
+    <!-- Expose Phaser scene classes on window so React modules can access them -->
+    <script>
+      window.WinScene            = WinScene;
+      window.BangkokMapGame      = BangkokMapGame;
+      window.KanchanaburiMemory  = KanchanaburiMemory;
+      window.TrainReflexGame     = TrainReflexGame;
+      window.KhaoSokPuzzle       = KhaoSokPuzzle;
+      window.LakeRaftGame        = LakeRaftGame;
+      window.SamuiBeachGame      = SamuiBeachGame;
+      window.BangkokFinalGame    = BangkokFinalGame;
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
