@@ -42,6 +42,7 @@ export function StoryDrawer({ location, locSave, onPlay, onClose }) {
         {/* Close */}
         <button
           onClick={onClose}
+          aria-label="Sluit"
           style={{
             position: 'absolute', top: 16, right: 16,
             width: 36, height: 36, borderRadius: '50%',

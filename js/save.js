@@ -1,9 +1,52 @@
-const SAVE_KEY = 'thailand_save';
+var PLAYERS_KEY = 'thailand_players';
+var ACTIVE_KEY  = 'thailand_active';
+var SETTINGS_KEY = 'thailand_settings';
 
-function _defaultSave() {
+// ── Active player ──────────────────────────────────────────────────────────────
+
+function getActivePlayer() {
+    return localStorage.getItem(ACTIVE_KEY) || null;
+}
+
+function setActivePlayer(name) {
+    localStorage.setItem(ACTIVE_KEY, name);
+}
+
+function getSaveKey() {
+    var active = getActivePlayer();
+    return active ? 'thailand_save_' + active : 'thailand_save';
+}
+
+// ── Player list ────────────────────────────────────────────────────────────────
+
+function getPlayerList() {
+    try { return JSON.parse(localStorage.getItem(PLAYERS_KEY)) || []; }
+    catch (e) { return []; }
+}
+
+function addPlayer(name) {
+    var list = getPlayerList();
+    if (!list.includes(name)) {
+        list.push(name);
+        localStorage.setItem(PLAYERS_KEY, JSON.stringify(list));
+    }
+}
+
+function removePlayer(name) {
+    var list = getPlayerList().filter(function (n) { return n !== name; });
+    localStorage.setItem(PLAYERS_KEY, JSON.stringify(list));
+    localStorage.removeItem('thailand_save_' + name);
+    if (getActivePlayer() === name) {
+        localStorage.removeItem(ACTIVE_KEY);
+    }
+}
+
+// ── Per-player save ────────────────────────────────────────────────────────────
+
+function _defaultSave(name) {
     return {
         version: 1,
-        players: { name1: '', name2: '' },
+        playerName: name || '',
         locations: LOCATIONS.map(function (loc) {
             return { id: loc.id, unlocked: loc.id === 'bangkok', completed: false, stars: 0 };
         }),
@@ -14,23 +57,24 @@ function _defaultSave() {
 
 function loadSave() {
     try {
-        var raw = localStorage.getItem(SAVE_KEY);
-        if (!raw) return _defaultSave();
+        var raw = localStorage.getItem(getSaveKey());
+        if (!raw) return _defaultSave(getActivePlayer());
         return JSON.parse(raw);
     } catch (e) {
-        return _defaultSave();
+        return _defaultSave(getActivePlayer());
     }
 }
 
 function writeSave(data) {
     data.lastPlayed = new Date().toISOString();
-    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    localStorage.setItem(getSaveKey(), JSON.stringify(data));
 }
 
-function createNewSave(name1, name2) {
-    var save = _defaultSave();
-    save.players.name1 = name1;
-    save.players.name2 = name2;
+function createPlayerSave(name) {
+    setActivePlayer(name);
+    addPlayer(name);
+    var save = _defaultSave(name);
+    writeSave(save);
     return save;
 }
 
@@ -47,5 +91,61 @@ function completeLocation(locationIndex, stars) {
 }
 
 function resetSave() {
-    localStorage.removeItem(SAVE_KEY);
+    var name = getActivePlayer();
+    if (name) {
+        writeSave(_defaultSave(name));
+    } else {
+        localStorage.removeItem('thailand_save');
+    }
 }
+
+function getHighscore(locationId) {
+    var data = loadSave();
+    return (data.highscores && data.highscores[locationId]) || 0;
+}
+
+function setHighscore(locationId, score) {
+    var data = loadSave();
+    if (!data.highscores) data.highscores = {};
+    if (score > (data.highscores[locationId] || 0)) {
+        data.highscores[locationId] = score;
+        writeSave(data);
+    }
+}
+
+// ── Settings ───────────────────────────────────────────────────────────────────
+
+function loadSettings() {
+    try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; }
+    catch (e) { return {}; }
+}
+
+function writeSettings(s) {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+}
+
+function resetGame(locationIndex) {
+    var data = loadSave();
+    var loc = data.locations[locationIndex];
+    loc.completed = false;
+    loc.stars = 0;
+    data.totalStars = data.locations.reduce(function (sum, l) { return sum + (l.stars || 0); }, 0);
+    writeSave(data);
+}
+
+// ── Window exports ─────────────────────────────────────────────────────────────
+
+window.loadSave = loadSave;
+window.writeSave = writeSave;
+window.completeLocation = completeLocation;
+window.resetSave = resetSave;
+window.getPlayerList = getPlayerList;
+window.addPlayer = addPlayer;
+window.removePlayer = removePlayer;
+window.getActivePlayer = getActivePlayer;
+window.setActivePlayer = setActivePlayer;
+window.createPlayerSave = createPlayerSave;
+window.getSaveKey = getSaveKey;
+window.loadSettings = loadSettings;
+window.writeSettings = writeSettings;
+window.resetGame = resetGame;

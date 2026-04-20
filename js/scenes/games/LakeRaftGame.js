@@ -8,199 +8,197 @@ class LakeRaftGame extends Phaser.Scene {
     }
 
     create() {
-        var scene     = this;
-        this.raftCX   = GAME_WIDTH  / 2;
-        this.raftCY   = 580;
-        this.raftW    = 300;
-        this.raftH    = 24;
-        this.tilt     = 0;
-        this._jerk    = 0;
-        this.lostItems = 0;
-        this.elapsed  = 0;
-        this.gameTime = 60;
+        var scene = this;
+        this.lane = 1;           // 0=left, 1=center, 2=right
+        this.score = 0;          // stars collected
+        this.lives = 3;
         this._running = true;
+        this._moving = false;    // canoe tween in progress
+        this._objects = [];      // {gfx, lane, y, type, active}
 
-        // Items: emoji + offsetX on raft
-        var itemData = [
-            { icon: '🧳', offsetX: -115 },
-            { icon: '🎒', offsetX: -55  },
-            { icon: '📷', offsetX:  0   },
-            { icon: '💧', offsetX:  55  },
-            { icon: '🕶️', offsetX:  115 }
-        ];
-        this.items       = itemData.map(function (d) {
-            return { icon: d.icon, offsetX: d.offsetX, caught: false, fallen: false };
-        });
+        this._laneX = [97, 195, 293];
+        this._canoeX = this._laneX[1];
 
-        // ── Night lake background ─────────────────────────────────────────
-        this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x020C18).setOrigin(0);
-
-        // Stars
-        var stars = this.add.graphics();
-        stars.fillStyle(0xFFFFFF, 1);
-        for (var si = 0; si < 60; si++) {
-            var alpha = 0.5 + Math.random() * 0.5;
-            stars.fillStyle(0xFFFFFF, alpha);
-            stars.fillCircle(Math.random() * GAME_WIDTH, Math.random() * 350, Math.random() < 0.2 ? 2 : 1);
-        }
+        // ── Background ──────────────────────────────────────────────────
+        // Night lake: dark teal
+        this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x041C2C).setOrigin(0);
 
         // Moon
-        this.add.circle(300, 70, 28, 0xFFF9C4).setAlpha(0.9);
+        var moonGfx = this.add.graphics();
+        moonGfx.fillStyle(0xFFF8E1, 0.9);
+        moonGfx.fillCircle(320, 80, 30);
+        moonGfx.fillStyle(0x041C2C, 1);
+        moonGfx.fillCircle(330, 74, 26); // crescent
 
-        // Jungle silhouette
-        var jungle = this.add.graphics();
-        jungle.fillStyle(0x0A1A0A, 1);
-        for (var ji = 0; ji < 10; ji++) {
-            var tx = ji * 45 - 20;
-            jungle.fillTriangle(tx, 450, tx + 30, 370 - Math.random() * 60, tx + 65, 450);
+        // Stars (random dots)
+        var starGfx = this.add.graphics();
+        starGfx.fillStyle(0xFFFFFF, 0.7);
+        for (var i = 0; i < 40; i++) {
+            starGfx.fillCircle(Math.random() * GAME_WIDTH, Math.random() * 300, Math.random() * 1.5 + 0.5);
         }
 
+        // Jungle silhouette left and right
+        var jungle = this.add.graphics();
+        jungle.fillStyle(0x0A3020, 1);
+        for (var j = 0; j < 6; j++) {
+            // Left trees
+            jungle.fillTriangle(-10, GAME_HEIGHT, j * 12, GAME_HEIGHT - 80 - j * 15, j * 12 + 24, GAME_HEIGHT);
+            // Right trees
+            var rx = GAME_WIDTH - j * 12 - 24;
+            jungle.fillTriangle(rx, GAME_HEIGHT, rx + 12, GAME_HEIGHT - 80 - j * 15, rx + 24, GAME_HEIGHT);
+        }
+
+        // Lane dividers (subtle)
+        var laneGfx = this.add.graphics();
+        laneGfx.lineStyle(1, 0x1A5276, 0.4);
+        laneGfx.lineBetween(this._laneX[0] + 48, 100, this._laneX[0] + 48, GAME_HEIGHT - 100);
+        laneGfx.lineBetween(this._laneX[1] + 48, 100, this._laneX[1] + 48, GAME_HEIGHT - 100);
+
         // Water (animated)
-        this.waterGfx = createWater(this, 440, 0x0D47A1);
+        this._water = createWater(this, 160, 0x0D4B6E);
 
-        // Water reflection (stars shimmering in water)
-        this.reflectionGfx = this.add.graphics();
+        // ── Canoe ────────────────────────────────────────────────────────
+        this._canoeGfx = this.add.graphics();
+        this._drawCanoe(this._canoeGfx, this._laneX[1], 720);
 
-        // Raft graphics (redrawn each frame)
-        this.raftGfx = this.add.graphics();
+        // ── Title bar ────────────────────────────────────────────────────
+        this.add.rectangle(0, 0, GAME_WIDTH, 94, 0x000000, 0.75).setOrigin(0);
+        titleText(this, 40, 'Cheow Lan – Kano Race', '#00BCD4');
 
-        // ── Item sprites ──────────────────────────────────────────────────
-        this.itemSprites = this.items.map(function (item) {
-            return scene.add.text(0, 0, item.icon, { fontSize: '36px' }).setOrigin(0.5);
-        });
-        this.itemZones = this.items.map(function (item, i) {
-            var z = scene.add.zone(0, 0, 50, 50).setInteractive();
-            z.on('pointerdown', function () { scene._catchItem(i); });
-            return z;
-        });
-
-        // ── Title ─────────────────────────────────────────────────────────
-        this.add.rectangle(0, 0, GAME_WIDTH, 72, 0x000000, 0.8).setOrigin(0);
-        titleText(this, 26, 'Cheow Lan – Houd het Vlot!', '#0288D1');
-        this.add.text(GAME_WIDTH / 2, 54, 'Tik op de spullen als ze beginnen te schuiven!', {
-            fontFamily: 'Arial', fontSize: '13px', color: '#80D8FF'
+        // HUD (stars + lives, shown inside title bar)
+        this._hudText = this.add.text(GAME_WIDTH / 2, 79, '', {
+            fontFamily: 'Arial', fontSize: '15px', color: '#FFFFFF',
+            stroke: '#000000', strokeThickness: 1
         }).setOrigin(0.5);
-
-        // ── HUD ───────────────────────────────────────────────────────────
-        this.add.rectangle(0, GAME_HEIGHT - 54, GAME_WIDTH, 54, 0x000000, 0.8).setOrigin(0);
-        this._safeText  = this.add.text(20, GAME_HEIGHT - 27, '', {
-            fontFamily: 'Arial', fontSize: '15px', color: '#80D8FF'
-        }).setOrigin(0, 0.5);
-        this._timerText = this.add.text(GAME_WIDTH - 20, GAME_HEIGHT - 27, '', {
-            fontFamily: 'Arial', fontSize: '15px', color: '#ffffff'
-        }).setOrigin(1, 0.5);
         this._updateHUD();
 
-        // Occasional jerk events
-        this.time.addEvent({
-            delay: 2200, loop: true, callback: function () {
-                if (!scene._running) return;
-                scene._jerk = (Math.random() - 0.5) * 0.36;
-                scene.time.delayedCall(700, function () { scene._jerk = 0; });
+        // ── Bottom bar ───────────────────────────────────────────────────
+        this.add.rectangle(0, GAME_HEIGHT - 55, GAME_WIDTH, 55, 0x000000, 0.7).setOrigin(0);
+        this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 27, 'Tik links of rechts om te sturen!', {
+            fontFamily: 'Arial', fontSize: '13px', color: '#888888'
+        }).setOrigin(0.5);
+
+        // ── Input ────────────────────────────────────────────────────────
+        this.input.on('pointerdown', function (ptr) {
+            if (!scene._running || scene._moving) return;
+            if (ptr.y < 72 || ptr.y > GAME_HEIGHT - 55) return; // ignore UI zones
+            if (ptr.x < GAME_WIDTH / 2) {
+                scene._moveLane(-1);
+            } else {
+                scene._moveLane(1);
             }
         });
 
-        // Back
-        var bz = this.add.zone(42, 32, 70, 30).setInteractive();
-        makeButton(this, 42, 32, 70, 30, 0x333333, '← Terug', 13);
-        bz.on('pointerdown', function () {
+        // ── Spawn timer ───────────────────────────────────────────────────
+        this._spawnEvent = this.time.addEvent({
+            delay: 1200, loop: true, callback: this._spawnObject, callbackScope: this
+        });
+
+        // ── Back button ──────────────────────────────────────────────────
+        backArrow(this, function () {
             scene._running = false;
-            scene.scene.start('MapScene', { saveData: loadSave() });
+            if (window._onReturnToMap) window._onReturnToMap();
+            else scene.scene.start('MapScene', { saveData: loadSave() });
         });
     }
 
-    _catchItem(idx) {
-        var item = this.items[idx];
-        if (item.caught || item.fallen) return;
-        item.caught = true;
-        SFX.collect();
-        this.tweens.add({ targets: this.itemSprites[idx], scaleX: 1.4, scaleY: 1.4, duration: 100, yoyo: true });
-        this._updateHUD();
+    _drawCanoe(gfx, cx, cy) {
+        gfx.clear();
+        // Canoe body: dark brown elongated shape
+        gfx.fillStyle(0x5D3A1A, 1);
+        gfx.fillEllipse(cx, cy, 56, 26);
+        // Canoe rim: lighter brown
+        gfx.lineStyle(3, 0x8B5E3C, 1);
+        gfx.strokeEllipse(cx, cy, 56, 26);
+        // Paddle (horizontal)
+        gfx.lineStyle(4, 0x795548, 1);
+        gfx.lineBetween(cx - 30, cy - 8, cx + 30, cy - 8);
+        gfx.fillStyle(0x5D4037, 1);
+        gfx.fillEllipse(cx - 32, cy - 8, 14, 8);
+        gfx.fillEllipse(cx + 32, cy - 8, 14, 8);
+    }
+
+    _moveLane(dir) {
+        var newLane = Phaser.Math.Clamp(this.lane + dir, 0, 2);
+        if (newLane === this.lane) return;
+        this.lane = newLane;
+        this._moving = true;
+        var scene = this;
+        this.tweens.add({
+            targets: { x: this._canoeX },
+            x: this._laneX[this.lane],
+            duration: 150,
+            ease: 'Power2',
+            onUpdate: function (tween, target) {
+                scene._canoeX = target.x;
+                scene._drawCanoe(scene._canoeGfx, target.x, 720);
+            },
+            onComplete: function () { scene._moving = false; }
+        });
+        SFX.tap();
+    }
+
+    _spawnObject() {
+        if (!this._running) return;
+        var lane = Phaser.Math.Between(0, 2);
+        var type = Math.random() < 0.3 ? 'star' : (Math.random() < 0.5 ? 'log' : 'rock');
+        var gfx = this.add.graphics();
+        // Draw once at local origin; setPosition to move cheaply each frame
+        this._drawObjectLocal(gfx, type);
+        gfx.setPosition(this._laneX[lane], -40);
+        var obj = { gfx: gfx, lane: lane, y: -40, type: type, active: true };
+        this._objects.push(obj);
+    }
+
+    // Draw obstacle/star at (0,0) local coords — called once at spawn, not every frame
+    _drawObjectLocal(gfx, type) {
+        gfx.clear();
+        if (type === 'log') {
+            gfx.fillStyle(0x6D4C41, 1);
+            gfx.fillRoundedRect(-40, -11, 80, 22, 8);
+            gfx.lineStyle(2, 0x4E342E, 1);
+            gfx.strokeRoundedRect(-40, -11, 80, 22, 8);
+            gfx.lineStyle(1, 0x4E342E, 0.5);
+            for (var i = -20; i <= 20; i += 10) {
+                gfx.lineBetween(i, -9, i, 9);
+            }
+        } else if (type === 'rock') {
+            gfx.fillStyle(0x607D8B, 1);
+            gfx.fillCircle(0, 0, 20);
+            gfx.fillStyle(0x546E7A, 1);
+            gfx.fillCircle(-5, -5, 8);
+            gfx.lineStyle(2, 0x455A64, 1);
+            gfx.strokeCircle(0, 0, 20);
+        } else { // star
+            drawStar(gfx, 0, 0, 18, 0xFFD700);
+        }
     }
 
     _updateHUD() {
-        var safe = this.items.filter(function (it) { return it.caught; }).length;
-        var lost = this.lostItems;
-        this._safeText.setText('✅ Veilig: ' + safe + '  ❌ Verloren: ' + lost);
-    }
-
-    _drawRaft() {
-        var cx  = this.raftCX;
-        var cy  = this.raftCY;
-        var w   = this.raftW;
-        var h   = this.raftH;
-        var t   = this.tilt;
-        var cos = Math.cos(t), sin = Math.sin(t);
-
-        this.raftGfx.clear();
-
-        // Raft body
-        this.raftGfx.fillStyle(0x6D3B1A, 1);
-        var pts = [
-            { x: cx - w/2*cos + h/2*sin, y: cy - w/2*sin - h/2*cos },
-            { x: cx + w/2*cos + h/2*sin, y: cy + w/2*sin - h/2*cos },
-            { x: cx + w/2*cos - h/2*sin, y: cy + w/2*sin + h/2*cos },
-            { x: cx - w/2*cos - h/2*sin, y: cy - w/2*sin + h/2*cos }
-        ];
-        this.raftGfx.fillPoints(pts, true);
-
-        // Plank lines
-        this.raftGfx.lineStyle(1, 0x4A2000, 0.7);
-        for (var pi = -2; pi <= 2; pi++) {
-            var off = pi * (w / 5);
-            this.raftGfx.lineBetween(
-                cx + off*cos + h/2*sin, cy + off*sin - h/2*cos,
-                cx + off*cos - h/2*sin, cy + off*sin + h/2*cos
-            );
-        }
-    }
-
-    _updateItems(delta) {
-        var cx  = this.raftCX;
-        var cy  = this.raftCY;
-        var t   = this.tilt;
-        var cos = Math.cos(t), sin = Math.sin(t);
-
-        this.items.forEach(function (item, i) {
-            if (item.caught || item.fallen) {
-                return;
-            }
-
-            // Slide toward lower end
-            item.offsetX += t * 2.8 * (delta / 1000) * 60;
-
-            // World position
-            var wx = cx + item.offsetX * cos - 14 * sin;
-            var wy = cy + item.offsetX * sin - 14 * cos - 25;
-
-            this.itemSprites[i].setPosition(wx, wy);
-            this.itemZones[i].setPosition(wx, wy);
-
-            // Fell off raft
-            if (Math.abs(item.offsetX) > this.raftW / 2 + 10) {
-                item.fallen = true;
-                this.itemSprites[i].setVisible(false);
-                this.itemZones[i].setActive(false);
-                this.lostItems++;
-                SFX.lose();
-                this._updateHUD();
-            }
-        }, this);
+        var hearts = '';
+        for (var i = 0; i < 3; i++) hearts += (i < this.lives ? '❤️' : '🖤');
+        this._hudText.setText('⭐ ' + this.score + '/12   ' + hearts);
     }
 
     _doEnd() {
         if (!this._running) return;
         this._running = false;
+        if (this._spawnEvent) this._spawnEvent.remove();
 
-        var safe = this.items.filter(function (it) { return it.caught; }).length;
-        var won  = safe >= 3;
+        var won = this.score >= 12;
         var scene = this;
+
+        // Overlay
+        this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.65).setOrigin(0);
 
         if (won) {
             SFX.win();
-            var stars = safe === 5 ? 3 : safe === 4 ? 2 : 1;
+            var stars = this.score >= 20 ? 3 : this.score >= 16 ? 2 : 1;
             completeLocation(this.locationIndex, stars);
-            this.time.delayedCall(300, function () {
+            this.add.text(GAME_WIDTH / 2, 270, '🚣', { fontSize: '70px' }).setOrigin(0.5);
+            bodyText(this, 370, 'Geweldig! ' + this.score + ' sterren gevangen!\nJullie zijn echte kanohelden!', '#88FF88', 18);
+            var btn = makeButton(this, GAME_WIDTH / 2, 490, 240, 54, COLORS.gold, 'Verder ▶', 22);
+            buttonInteractive(this, btn, GAME_WIDTH / 2, 490, 240, 54, function () {
                 scene.scene.start('WinScene', {
                     locationIndex: scene.locationIndex, stars: stars,
                     name1: scene.name1, name2: scene.name2
@@ -208,11 +206,11 @@ class LakeRaftGame extends Phaser.Scene {
             });
         } else {
             SFX.lose();
-            this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6).setOrigin(0);
-            bodyText(this, GAME_HEIGHT / 2 - 40, 'Oeps! Te veel spullen zijn gevallen!\nProbeer het opnieuw!', '#FF8888', 18);
-            var btn = makeButton(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 60, 220, 52, COLORS.orange, '🔄 Opnieuw', 20);
-            buttonInteractive(this, btn, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 60, 220, 52, function () {
-                scene.scene.restart();
+            this.add.text(GAME_WIDTH / 2, 270, '🌊', { fontSize: '70px' }).setOrigin(0.5);
+            bodyText(this, 370, 'Oh nee! ' + this.score + ' sterren – je hebt 12 nodig.\nProbeer het opnieuw!', '#FF8888', 18);
+            var retryBtn = makeButton(this, GAME_WIDTH / 2, 490, 220, 52, COLORS.orange, '🔄 Opnieuw', 20);
+            buttonInteractive(this, retryBtn, GAME_WIDTH / 2, 490, 220, 52, function () {
+                scene.scene.restart({ locationIndex: scene.locationIndex, name1: scene.name1, name2: scene.name2 });
             });
         }
     }
@@ -220,20 +218,58 @@ class LakeRaftGame extends Phaser.Scene {
     update(time, delta) {
         if (!this._running) return;
 
-        // Smooth tilt
-        var target = 0.20 * Math.sin(time * 0.00072) + this._jerk;
-        this.tilt += (target - this.tilt) * 0.06;
+        // Animate water
+        updateWater(this._water, time);
 
-        updateWater(this.waterGfx, time);
-        this._drawRaft();
-        this._updateItems(delta);
+        // Move objects down
+        var speed = 120 + Math.floor(this.score / 3) * 20;
+        var dt = delta / 1000;
+        var scene = this;
 
-        this.elapsed += delta / 1000;
-        var remaining = Math.ceil(this.gameTime - this.elapsed);
-        this._timerText.setText('⏱ ' + remaining + 's');
+        for (var i = this._objects.length - 1; i >= 0; i--) {
+            var obj = this._objects[i];
+            if (!obj.active) {
+                this._objects.splice(i, 1);
+                continue;
+            }
+            obj.y += speed * dt;
+            obj.gfx.setY(obj.y);
 
-        if (this.elapsed >= this.gameTime) {
-            this._doEnd();
+            // Off screen
+            if (obj.y > GAME_HEIGHT + 40) {
+                obj.gfx.destroy();
+                obj.active = false;
+                this._objects.splice(i, 1);
+                continue;
+            }
+
+            // Collision with canoe (same lane, y close to 720)
+            if (obj.lane === this.lane && Math.abs(obj.y - 720) < 35) {
+                obj.active = false;
+                obj.gfx.destroy();
+                this._objects.splice(i, 1);
+
+                if (obj.type === 'star') {
+                    this.score++;
+                    SFX.collect();
+                    this._updateHUD();
+                    if (this.score >= 12) {
+                        this._doEnd();
+                        return;
+                    }
+                } else {
+                    // Obstacle hit
+                    SFX.wrong();
+                    this.lives--;
+                    this._updateHUD();
+                    // Flash canoe red
+                    scene.cameras.main.flash(300, 150, 0, 0);
+                    if (this.lives <= 0) {
+                        this._doEnd();
+                        return;
+                    }
+                }
+            }
         }
     }
 }

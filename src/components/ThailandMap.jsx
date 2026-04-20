@@ -1,13 +1,36 @@
+import { useMemo } from 'react'
 import { LOCATIONS } from '../data/locations'
 
+const BACKGROUNDS = [
+  '/img/backgrounds/bg1.jpg',
+  '/img/backgrounds/bg2.jpg',
+  '/img/backgrounds/bg3.jpg',
+  '/img/backgrounds/bg4.jpg',
+  '/img/backgrounds/bg5.jpg',
+  '/img/backgrounds/bg6.jpg',
+  '/img/backgrounds/bg7.jpg',
+  '/img/backgrounds/bg8.jpg',
+  '/img/backgrounds/bg9.jpg',
+]
+
 export function ThailandMap({ save, activeIdx, onMarkerTap }) {
+  const bg = useMemo(
+    () => BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)],
+    []
+  )
+
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <img
-        src="/img/map.png"
+        src={bg}
         alt="Kaart van Thailand"
         draggable={false}
-        style={{ width: '100%', display: 'block', pointerEvents: 'none' }}
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover', objectPosition: 'center',
+          pointerEvents: 'none',
+        }}
       />
       {/* SVG overlay — viewBox matches the image so coordinates are proportional */}
       <svg
@@ -19,6 +42,16 @@ export function ThailandMap({ save, activeIdx, onMarkerTap }) {
           overflow: 'visible',
         }}
       >
+        {/* Faint circle guide */}
+        <ellipse
+          cx="55" cy="52"
+          rx="28.21" ry="25.76"
+          fill="none"
+          stroke="rgba(232,160,32,0.15)"
+          strokeWidth="0.5"
+          strokeDasharray="2 2"
+        />
+
         {/* Route line between consecutive unlocked locations */}
         {LOCATIONS.map((loc, idx) => {
           if (idx === 0) return null

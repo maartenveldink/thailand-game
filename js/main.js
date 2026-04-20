@@ -11,6 +11,7 @@ window._startGame = function () {
         height: GAME_HEIGHT,
         backgroundColor: '#1A0A00',
         parent: 'game-container',
+        resolution: window.devicePixelRatio || 1,
         scale: {
             mode:       Phaser.Scale.FIT,
             autoCenter: Phaser.Scale.CENTER_BOTH

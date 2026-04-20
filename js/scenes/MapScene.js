@@ -144,7 +144,7 @@ class MapScene extends Phaser.Scene {
         topBar.fillRect(0, 0, GAME_WIDTH, 56);
 
         // Title
-        this.add.text(GAME_WIDTH / 2, 28, '🇹🇭  Thailand Avontuur', {
+        this.add.text(GAME_WIDTH / 2, 28, '🌴 Thailand Avontuur', {
             fontFamily: 'Georgia, serif',
             fontSize: '18px',
             color: '#E8A020',

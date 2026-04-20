@@ -18,6 +18,21 @@ function makeButton(scene, x, y, w, h, color, label, fontSize) {
     return { bg: gfx, text: txt };
 }
 
+// Small arrow-only back button (no text label)
+function backArrow(scene, callback, yPos) {
+    var x = 26, y = yPos !== undefined ? yPos : 50, w = 36, h = 36;
+    var gfx = scene.add.graphics();
+    gfx.fillStyle(0x333333, 1);
+    gfx.fillRoundedRect(x - w / 2, y - h / 2, w, h, 10);
+    scene.add.text(x, y, '◀', {
+        fontFamily: 'Arial', fontSize: '18px', color: '#ffffff',
+        stroke: '#000', strokeThickness: 2
+    }).setOrigin(0.5);
+    var zone = scene.add.zone(x, y, w, h).setInteractive();
+    zone.on('pointerdown', callback);
+    return zone;
+}
+
 // Make a button interactive
 function buttonInteractive(scene, bg, x, y, w, h, callback) {
     var zone = scene.add.zone(x, y, w, h).setInteractive();
@@ -78,14 +93,16 @@ function updateWater(gfx, time) {
 }
 
 // Simple title text helper
-function titleText(scene, y, label, color) {
-    return scene.add.text(GAME_WIDTH / 2, y, label, {
+function titleText(scene, y, label, color, xOffset) {
+    xOffset = xOffset || 0;
+    return scene.add.text(GAME_WIDTH / 2 + xOffset, y, label, {
         fontFamily: 'Georgia, serif',
         fontSize: '26px',
         color: color || '#E8A020',
         stroke: '#000000',
         strokeThickness: 3,
-        align: 'center'
+        align: 'center',
+        wordWrap: { width: GAME_WIDTH - 90 - Math.abs(xOffset) }
     }).setOrigin(0.5);
 }
 
