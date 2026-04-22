@@ -616,8 +616,16 @@ export default function TriviaScreen({ onBack }) {
         transform: showDetail ? 'translateX(0)' : 'translateX(100%)',
         transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
         display: 'flex', flexDirection: 'column', zIndex: 10,
-        touchAction: 'pan-y',
       }}>
+        {/* Onzichtbare swipe-zone linkerrand: swipe rechts = terug */}
+        <div
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          style={{
+            position: 'absolute', left: 0, top: 0, bottom: 0, width: 40,
+            zIndex: 20, touchAction: 'none',
+          }}
+        />
         {/* Detail header */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
           <button onClick={() => setShowDetail(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 22, cursor: 'pointer', marginRight: 12 }}>←</button>
