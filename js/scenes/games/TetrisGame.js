@@ -2,12 +2,12 @@
 var PIECE_KEYS = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
 var PIECES = {
     I: { cells: [[0,1],[1,1],[2,1],[3,1]], color: 0xFFD700 },
-    O: { cells: [[0,0],[1,0],[0,1],[1,1]], color: 0xE53935 },
-    T: { cells: [[1,0],[0,1],[1,1],[2,1]], color: 0x1E88E5 },
-    S: { cells: [[1,0],[2,0],[0,1],[1,1]], color: 0x43A047 },
-    Z: { cells: [[0,0],[1,0],[1,1],[2,1]], color: 0xFB8C00 },
-    J: { cells: [[0,0],[0,1],[1,1],[2,1]], color: 0x8E24AA },
-    L: { cells: [[2,0],[0,1],[1,1],[2,1]], color: 0x00ACC1 },
+    O: { cells: [[0,0],[1,0],[0,1],[1,1]], color: 0xFF1744 },
+    T: { cells: [[1,0],[0,1],[1,1],[2,1]], color: 0x00B0FF },
+    S: { cells: [[1,0],[2,0],[0,1],[1,1]], color: 0x00E676 },
+    Z: { cells: [[0,0],[1,0],[1,1],[2,1]], color: 0xFF6D00 },
+    J: { cells: [[0,0],[0,1],[1,1],[2,1]], color: 0xE040FB },
+    L: { cells: [[2,0],[0,1],[1,1],[2,1]], color: 0x00E5FF },
 };
 
 class TetrisGame extends Phaser.Scene {
@@ -38,28 +38,28 @@ class TetrisGame extends Phaser.Scene {
         this.BOARD_Y = 78;   // top edge of board
         this.CELL = 28;      // cell size
 
-        // ── Background ────────────────────────────────────────────────
-        this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x0A0A1E).setOrigin(0);
+        // ── Background: tropisch zeeblauw ─────────────────────────────
+        this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x0288D1).setOrigin(0);
+        // Lichtere bovenhelft voor luchtgevoel
+        this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT * 0.45, 0x4FC3F7, 0.35).setOrigin(0);
 
-        // Temple silhouette (decorative, behind board)
+        // Tempel silhouet — goudkleurig
         var temple = this.add.graphics();
-        temple.fillStyle(0x12124A, 1);
-        // Main spire
+        temple.fillStyle(0x0277BD, 1);
         temple.fillTriangle(195, 78, 155, 200, 235, 200);
         temple.fillRect(160, 200, 70, 60);
-        // Side towers
         temple.fillTriangle(120, 160, 95, 220, 145, 220);
         temple.fillRect(100, 220, 45, 40);
         temple.fillTriangle(270, 160, 245, 220, 295, 220);
         temple.fillRect(245, 220, 45, 40);
 
         // ── Title bar ─────────────────────────────────────────────────
-        this.add.rectangle(0, 0, GAME_WIDTH, 86, 0x000000, 0.85).setOrigin(0);
+        this.add.rectangle(0, 0, GAME_WIDTH, 86, 0x01579B, 0.9).setOrigin(0);
         titleText(this, 40, '🏯 Thailand Tetris', '#FFD700');
 
-        // ── Board border ──────────────────────────────────────────────
+        // ── Board border: heldere cyaan ───────────────────────────────
         var border = this.add.graphics();
-        border.lineStyle(2, 0xFFD700, 0.5);
+        border.lineStyle(2, 0x00E5FF, 0.8);
         border.strokeRect(this.BOARD_X - 2, this.BOARD_Y - 2, 10 * this.CELL + 4, 20 * this.CELL + 4);
 
         // ── Board graphics (redrawn each update) ──────────────────────
@@ -67,15 +67,17 @@ class TetrisGame extends Phaser.Scene {
 
         // ── Right panel ───────────────────────────────────────────────
         var panelX = this.BOARD_X + 10 * this.CELL + 12;
-        this.add.text(panelX, 85, 'Volgend:', { fontFamily: 'Arial', fontSize: '13px', color: '#AAAAAA' });
+        this.add.text(panelX, 85, 'Volgend:', { fontFamily: 'Arial', fontSize: '13px', color: '#B3E5FC' });
         this._nextGfx = this.add.graphics();
         this._scoreText = this.add.text(panelX, 175, 'Score\n0', { fontFamily: 'Arial', fontSize: '13px', color: '#FFD700', align: 'left' });
-        this._levelText = this.add.text(panelX, 230, 'Level\n1', { fontFamily: 'Arial', fontSize: '13px', color: '#00BCD4', align: 'left' });
-        this._linesText = this.add.text(panelX, 285, 'Lijnen\n0', { fontFamily: 'Arial', fontSize: '13px', color: '#4CAF50', align: 'left' });
-        this._highText  = this.add.text(panelX, 340, '🏆\n' + getHighscore('tetris'), { fontFamily: 'Arial', fontSize: '13px', color: '#FF9800', align: 'left' });
+        this._levelText = this.add.text(panelX, 230, 'Level\n1', { fontFamily: 'Arial', fontSize: '13px', color: '#00E5FF', align: 'left' });
+        this._linesText = this.add.text(panelX, 285, 'Lijnen\n0', { fontFamily: 'Arial', fontSize: '13px', color: '#69F0AE', align: 'left' });
+        this._highText  = this.add.text(panelX, 340, '🏆\n' + getHighscore('tetris'), { fontFamily: 'Arial', fontSize: '13px', color: '#FFAB40', align: 'left' });
 
-        // ── Virtual buttons ───────────────────────────────────────────
+        // ── Knoppen met kleur-flash animatie ──────────────────────────
         var btnY = 725;
+        var BTN_COLOR  = 0xFF6D00;  // tropisch oranje
+        var BTN_FLASH  = 0xFFD740;  // geel-goud flash bij tap
         var btns = [
             { label: '←',  x: 50,  cb: function(){ scene._moveH(-1); } },
             { label: '↻',  x: 143, cb: function(){ scene._rotate(); } },
@@ -83,8 +85,23 @@ class TetrisGame extends Phaser.Scene {
             { label: '⬇',  x: 330, cb: function(){ scene._hardDrop(); } },
         ];
         btns.forEach(function(b) {
-            var bg = makeButton(scene, b.x, btnY, 75, 56, 0x1A237E, b.label, 22);
-            buttonInteractive(scene, bg, b.x, btnY, 75, 56, b.cb);
+            var gfx = scene.add.graphics();
+            function drawBtn(col) {
+                gfx.clear();
+                gfx.fillStyle(col, 1);
+                gfx.fillRoundedRect(b.x - 37, btnY - 28, 75, 56, 12);
+            }
+            drawBtn(BTN_COLOR);
+            scene.add.text(b.x, btnY, b.label, {
+                fontFamily: 'Arial', fontSize: '26px', color: '#fff',
+                stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5);
+            var zone = scene.add.zone(b.x, btnY, 75, 56).setInteractive();
+            zone.on('pointerdown', function() {
+                drawBtn(BTN_FLASH);
+                b.cb();
+                scene.time.delayedCall(130, function() { drawBtn(BTN_COLOR); });
+            });
         });
 
         // ── Back button ───────────────────────────────────────────────
@@ -256,7 +273,7 @@ class TetrisGame extends Phaser.Scene {
         }
 
         // Grid lines (subtle)
-        gfx.lineStyle(1, 0x1A1A4E, 0.6);
+        gfx.lineStyle(1, 0x0369A1, 0.5);
         for (var gc = 1; gc < 10; gc++) gfx.lineBetween(bx + gc*cs, by, bx + gc*cs, by + 20*cs);
         for (var gr = 1; gr < 20; gr++) gfx.lineBetween(bx, by + gr*cs, bx + 10*cs, by + gr*cs);
 
