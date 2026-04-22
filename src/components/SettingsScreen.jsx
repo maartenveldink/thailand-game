@@ -142,6 +142,27 @@ export function SettingsScreen({ save, onBack, onSaveChanged }) {
           })}
         </section>
 
+        {/* Algemeen */}
+        <section style={{ marginBottom: '24px' }}>
+          <h3 style={{ color: '#E8A020', marginBottom: '12px' }}>Algemeen</h3>
+          <div style={row}>
+            <div>
+              <div style={{ fontSize: '14px' }}>📚 Trivia bij opstarten</div>
+              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>Toon een weetje als het hoofdscherm laadt</div>
+            </div>
+            <button
+              onClick={() => updateSetting('triviaOnStart', !(settings.triviaOnStart ?? true))}
+              style={{
+                ...BTN.base, padding: '8px 18px', flexShrink: 0,
+                background: (settings.triviaOnStart ?? true) ? '#E8A020' : 'rgba(255,255,255,0.1)',
+                color: (settings.triviaOnStart ?? true) ? '#000' : '#fff',
+              }}
+            >
+              {(settings.triviaOnStart ?? true) ? 'Aan' : 'Uit'}
+            </button>
+          </div>
+        </section>
+
         {/* Difficulty settings */}
         <section>
           <h3 style={{ color: '#E8A020', marginBottom: '12px' }}>Moeilijkheid per spel</h3>

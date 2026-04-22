@@ -137,6 +137,7 @@ export default function FotoStickerFrameScreen({ onBack }) {
   const [exported, setExported] = useState(false)
   const canvasRef = useRef(null)
   const fileRef = useRef(null)
+  const cameraRef = useRef(null)
 
   const frame = FRAMES.find(f => f.key === frameKey)
 
@@ -242,17 +243,30 @@ export default function FotoStickerFrameScreen({ onBack }) {
         </div>
 
         {/* Foto kiezen */}
-        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
-        <button
-          onClick={() => fileRef.current.click()}
-          style={{
-            padding: '14px', borderRadius: 12, border: '2px dashed rgba(255,255,255,0.25)',
-            background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15,
-            cursor: 'pointer', fontWeight: 600,
-          }}
-        >
-          📷 {photo ? 'Andere foto kiezen' : 'Foto kiezen uit galerij'}
-        </button>
+        <input ref={fileRef}   type="file" accept="image/*"                    style={{ display: 'none' }} onChange={handleFile} />
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleFile} />
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => cameraRef.current.click()}
+            style={{
+              flex: 1, padding: '14px', borderRadius: 12, border: '2px dashed rgba(255,255,255,0.25)',
+              background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15,
+              cursor: 'pointer', fontWeight: 600,
+            }}
+          >
+            📷 Camera
+          </button>
+          <button
+            onClick={() => fileRef.current.click()}
+            style={{
+              flex: 1, padding: '14px', borderRadius: 12, border: '2px dashed rgba(255,255,255,0.25)',
+              background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15,
+              cursor: 'pointer', fontWeight: 600,
+            }}
+          >
+            🖼️ Galerij
+          </button>
+        </div>
 
         {/* Frame kiezen */}
         <div>

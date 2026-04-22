@@ -1,11 +1,15 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Star, Gamepad2 } from 'lucide-react'
 import { ThailandMap } from './ThailandMap'
 import { StoryDrawer } from './StoryDrawer'
 import { LOCATIONS } from '../data/locations'
+import { TRIVIA_FACTS } from '../data/triviaFacts'
 
 export function MapScreen({ save, onPlay, onGamesMenu, onSettings, onBeheer, onSwitchPlayer, isBeheer }) {
   const [activeIdx, setActiveIdx] = useState(null)
+  const trivia = useMemo(() => TRIVIA_FACTS[Math.floor(Math.random() * TRIVIA_FACTS.length)], [])
+  const triviaEnabled = (window.loadSettings?.() ?? {}).triviaOnStart ?? true
+  const [triviaVisible, setTriviaVisible] = useState(triviaEnabled)
 
   const handleMarkerTap = (idx) => {
     if (save.locations[idx].unlocked) setActiveIdx(idx)
@@ -85,6 +89,48 @@ export function MapScreen({ save, onPlay, onGamesMenu, onSettings, onBeheer, onS
             onPlay={handlePlay}
             onClose={() => setActiveIdx(null)}
           />
+        </div>
+      )}
+
+      {/* Trivia overlay */}
+      {triviaVisible && (
+        <div
+          onClick={() => setTriviaVisible(false)}
+          style={{
+            position: 'absolute', inset: 0, zIndex: 20,
+            background: 'rgba(0,0,0,0.65)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 24,
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: 'linear-gradient(135deg,#1a1a2e,#16213e)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 20, padding: '28px 24px',
+              maxWidth: 340, width: '100%',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
+              fontFamily: 'sans-serif', color: '#fff',
+            }}
+          >
+            <div style={{ fontSize: 12, color: '#E8A020', background: 'rgba(232,160,32,0.15)', border: '1px solid rgba(232,160,32,0.3)', borderRadius: 20, padding: '4px 14px' }}>
+              📚 Wist je dat…
+            </div>
+            <div style={{ fontSize: 64, lineHeight: 1 }}>{trivia.emoji}</div>
+            <div style={{ fontSize: 17, fontWeight: 700, textAlign: 'center', lineHeight: 1.3 }}>{trivia.title}</div>
+            <div style={{ fontSize: 14, lineHeight: 1.7, textAlign: 'center', color: 'rgba(255,255,255,0.8)' }}>{trivia.fact}</div>
+            <button
+              onClick={() => setTriviaVisible(false)}
+              style={{
+                marginTop: 4, padding: '12px 32px', borderRadius: 12, border: 'none',
+                background: '#E8A020', color: '#000', fontWeight: 700, fontSize: 15, cursor: 'pointer',
+              }}
+            >
+              Aan de slag! 🌴
+            </button>
+          </div>
         </div>
       )}
     </div>

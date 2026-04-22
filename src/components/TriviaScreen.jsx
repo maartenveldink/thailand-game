@@ -418,17 +418,27 @@ const TRIVIA = [
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
+function shuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 export default function TriviaScreen({ onBack }) {
   const [activeCats, setActiveCats]   = useState(new Set()) // leeg = alles
   const [index, setIndex]             = useState(0)
   const [showDetail, setShowDetail]   = useState(false)
   const [fade, setFade]               = useState(true)
+  const [shuffled]                    = useState(() => shuffle(TRIVIA))
 
   const pointerStart = useRef(null)
 
   const filtered = activeCats.size === 0
-    ? TRIVIA
-    : TRIVIA.filter(t => activeCats.has(t.cat))
+    ? shuffled
+    : shuffled.filter(t => activeCats.has(t.cat))
 
   const safeIndex = Math.min(index, filtered.length - 1)
   const item = filtered[safeIndex] ?? filtered[0]
@@ -475,16 +485,16 @@ export default function TriviaScreen({ onBack }) {
     if (absDx < 20 && absDy < 20) return // tap, geen swipe
 
     if (showDetail) {
-      // In detail: swipe links → terug
-      if (dx < -50 && absDx > absDy) setShowDetail(false)
+      // In detail: swipe rechts → terug
+      if (dx > 50 && absDx > absDy) setShowDetail(false)
     } else {
       if (absDy > absDx) {
         // Verticaal: boven = volgende, beneden = vorige
         if (dy < -50) go(1)
         else if (dy > 50) go(-1)
       } else {
-        // Horizontaal: rechts = detail
-        if (dx > 50) setShowDetail(true)
+        // Horizontaal: links = detail (panel schuift van rechts in)
+        if (dx < -50) setShowDetail(true)
       }
     }
   }
