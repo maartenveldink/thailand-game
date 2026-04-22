@@ -4,6 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 export default defineConfig({
+  base: '/thailand-game/',
   plugins: [
     react(),
     viteStaticCopy({
@@ -17,8 +18,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        globPatterns: ['**/*.{js,css,html,png,svg,jpg,jpeg,webmanifest}'],
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
       },
       manifest: {
         name: 'Thailand Avontuur',
@@ -28,7 +29,8 @@ export default defineConfig({
         background_color: '#0D1B4B',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
+        start_url: '/thailand-game/',
+        scope: '/thailand-game/',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
