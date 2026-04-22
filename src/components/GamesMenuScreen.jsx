@@ -3,7 +3,7 @@ import { LOCATIONS } from '../data/locations'
 
 const REISTOOLS = [
   { key: 'baht',                  label: 'Baht Rekenmachine',   emoji: '💱', desc: 'Hoeveel is jouw euro waard in Baht?' },
-  { key: 'woordenboek',           label: 'Woordenboek',          img: '/img/flag.png',  desc: 'Leer Thaise woorden met flip-kaartjes' },
+  { key: 'woordenboek',           label: 'Woordenboek',          img: import.meta.env.BASE_URL + 'img/flag.png',  desc: 'Leer Thaise woorden met flip-kaartjes' },
   { key: 'dagboek',               label: 'Reisdagboek',          emoji: '📖', desc: 'Schrijf je herinneringen per plek op' },
   { key: 'dagelijkse-uitdaging',  label: 'Dagelijkse Uitdaging', emoji: '📅', desc: 'Elke dag een nieuwe puzzel!' },
   { key: 'scorebord',             label: 'Scorebord',            emoji: '🏆', desc: 'Wie staat er voor?' },

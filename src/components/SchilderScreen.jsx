@@ -228,16 +228,17 @@ const BLOCK_PRESETS = [
 
 // ── Gallery ───────────────────────────────────────────────────────────────────
 
+const BASE = import.meta.env.BASE_URL
 const DEFAULT_IMAGES = [
-  { label: 'Bangkok',      src: '/img/backgrounds/bg1.jpg' },
-  { label: 'Kanchanaburi', src: '/img/backgrounds/bg2.jpg' },
-  { label: 'Nachttrein',   src: '/img/backgrounds/bg3.jpg' },
-  { label: 'Khao Sok',     src: '/img/backgrounds/bg4.jpg' },
-  { label: 'Cheow Lan',    src: '/img/backgrounds/bg5.jpg' },
-  { label: 'Koh Samui',    src: '/img/backgrounds/bg6.jpg' },
-  { label: 'Tempel',       src: '/img/backgrounds/bg7.jpg' },
-  { label: 'Jungle',       src: '/img/backgrounds/bg8.jpg' },
-  { label: 'Strand',       src: '/img/backgrounds/bg9.jpg' },
+  { label: 'Bangkok',      src: BASE + 'img/backgrounds/bg1.jpg' },
+  { label: 'Kanchanaburi', src: BASE + 'img/backgrounds/bg2.jpg' },
+  { label: 'Nachttrein',   src: BASE + 'img/backgrounds/bg3.jpg' },
+  { label: 'Khao Sok',     src: BASE + 'img/backgrounds/bg4.jpg' },
+  { label: 'Cheow Lan',    src: BASE + 'img/backgrounds/bg5.jpg' },
+  { label: 'Koh Samui',    src: BASE + 'img/backgrounds/bg6.jpg' },
+  { label: 'Tempel',       src: BASE + 'img/backgrounds/bg7.jpg' },
+  { label: 'Jungle',       src: BASE + 'img/backgrounds/bg8.jpg' },
+  { label: 'Strand',       src: BASE + 'img/backgrounds/bg9.jpg' },
 ]
 
 function SchilderGallery({ onSelect, onBack }) {

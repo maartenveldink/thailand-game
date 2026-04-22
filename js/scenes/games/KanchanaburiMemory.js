@@ -9,7 +9,7 @@ class KanchanaburiMemory extends Phaser.Scene {
 
     preload() {
         if (!this.textures.exists('memoryCard')) {
-            this.load.image('memoryCard', '/img/memory.card.jpg');
+            this.load.image('memoryCard', (window.ASSET_BASE || '/') + 'img/memory.card.jpg');
         }
     }
 

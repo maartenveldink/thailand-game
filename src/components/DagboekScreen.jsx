@@ -17,7 +17,7 @@ function timestamp() {
 }
 
 function ShareIcon({ size = 20, color = '#25D366' }) {
-  return <img src="/img/share.svg" style={{ width: size, height: size, filter: color === '#25D366' ? 'invert(59%) sepia(98%) saturate(400%) hue-rotate(100deg) brightness(95%)' : 'invert(1) opacity(0.25)' }} alt="Delen" />
+  return <img src={import.meta.env.BASE_URL + 'img/share.svg'} style={{ width: size, height: size, filter: color === '#25D366' ? 'invert(59%) sepia(98%) saturate(400%) hue-rotate(100deg) brightness(95%)' : 'invert(1) opacity(0.25)' }} alt="Delen" />
 }
 
 export function DagboekScreen({ onBack }) {

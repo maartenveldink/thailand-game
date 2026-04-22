@@ -14,9 +14,10 @@ class PongGame extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('pong_coconut', '/img/coconut.small.png');
-        this.load.image('pong_beach', '/img/beach.png');
-        this.load.image('pong_hand', '/img/monkey.hand.png');
+        var base = window.ASSET_BASE || '/';
+        this.load.image('pong_coconut', base + 'img/coconut.small.png');
+        this.load.image('pong_beach',   base + 'img/beach.png');
+        this.load.image('pong_hand',    base + 'img/monkey.hand.png');
     }
 
     create() {

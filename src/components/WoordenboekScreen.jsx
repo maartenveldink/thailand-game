@@ -138,7 +138,7 @@ export function WoordenboekScreen({ onBack }) {
           ← Terug
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/img/flag.png" style={{ width: 24, height: 24, objectFit: 'contain' }} alt="Thaise vlag" />
+          <img src={import.meta.env.BASE_URL + 'img/flag.png'} style={{ width: 24, height: 24, objectFit: 'contain' }} alt="Thaise vlag" />
           <span style={{ fontSize: '18px', fontWeight: 700, color: '#E8A020' }}>Woordenboek</span>
         </div>
         {/* Default side toggle */}

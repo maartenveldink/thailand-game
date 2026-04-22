@@ -11,7 +11,7 @@ const ITEMS = [
   { id: 'bloem',    label: 'Bloemkrans',            emoji: '💐' },
   { id: 'gecko',    label: 'Gekko',                emoji: '🦎' },
   { id: 'mango',    label: 'Mango sticky rice',    emoji: '🥭' },
-  { id: 'vlag',     label: 'Thaise vlag',           img: '/img/flag.png' },
+  { id: 'vlag',     label: 'Thaise vlag',           img: import.meta.env.BASE_URL + 'img/flag.png' },
   { id: 'motor',    label: 'Scooter met gezin',     emoji: '🛵' },
   { id: 'markt',    label: 'Drijvende markt',       emoji: '🚣' },
   { id: 'brand',    label: 'Wierook/offering',      emoji: '🪔' },
