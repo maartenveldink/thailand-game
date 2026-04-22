@@ -2,12 +2,44 @@
 // No hard end; highscore = max level reached, saved per player.
 // Completing 5 levels unlocks the next location.
 
-// 15 beach spot positions, revealed progressively as level increases
-var SAMUI_SPOTS = [
-    {x:60, y:520},{x:130,y:520},{x:200,y:520},{x:270,y:520},{x:330,y:520},
-    {x:90, y:600},{x:170,y:600},{x:250,y:600},{x:320,y:600},{x:45, y:558},
-    {x:375,y:555},{x:75, y:680},{x:155,y:685},{x:235,y:675},{x:315,y:678}
-];
+// Returns {cols, rows} for a given level. Grid grows every 2 levels:
+// 3×3 → 3×4 → 4×4 → 4×5 → 5×5 → … max 6×7
+function _samuiGridAt(level, minCols, minRows, maxCols, maxRows) {
+    minCols = minCols || 3; minRows = minRows || 3;
+    maxCols = maxCols || 6; maxRows = maxRows || 7;
+    var cols = minCols, rows = minRows;
+    var steps = Math.floor((level - 1) / 2);
+    for (var i = 0; i < steps; i++) {
+        if (cols >= maxCols && rows >= maxRows) break;
+        if (cols === rows) {
+            if (rows < maxRows) rows++; else cols++;
+        } else if (cols > rows) {
+            if (rows < maxRows) rows++; else cols++;
+        } else {
+            if (cols < maxCols) cols++; else rows++;
+        }
+    }
+    return { cols: Math.min(cols, maxCols), rows: Math.min(rows, maxRows) };
+}
+
+// Generate centered grid positions on the beach area
+function _samuiSpots(cols, rows) {
+    var marginX = 20;
+    var startY = Math.round(GAME_HEIGHT * 0.47);
+    var areaH  = Math.round(GAME_HEIGHT * 0.47);
+    var w = GAME_WIDTH - 2 * marginX;
+    var cW = w / cols, rH = areaH / rows;
+    var spots = [];
+    for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+            spots.push({
+                x: Math.round(marginX + (c + 0.5) * cW),
+                y: Math.round(startY + (r + 0.5) * rH)
+            });
+        }
+    }
+    return spots;
+}
 
 class SamuiBeachGame extends Phaser.Scene {
     constructor() { super({ key: 'SamuiBeachGame' }); }
@@ -19,14 +51,18 @@ class SamuiBeachGame extends Phaser.Scene {
     }
 
     create() {
-        var settings     = window.loadSettings ? window.loadSettings() : {};
-        this._minShells  = Math.max(1, settings.shellsMin || 2);
-        this._maxShells  = Math.max(this._minShells + 1, settings.shellsMax || 8);
-        this._level      = 1;
-        this._unlocked   = false;   // completeLocation called once at level 6
-        this._running    = true;
-        this._phase      = 'idle';  // idle | show | guess
-        this._roundObjs  = [];      // objects created per-round (cleared between rounds)
+        var settings      = window.loadSettings ? window.loadSettings() : {};
+        this._minShells   = Math.max(1, settings.shellsMin || 2);
+        this._maxShells   = Math.max(this._minShells + 1, settings.shellsMax || 8);
+        this._minGridCols = Math.max(2, settings.samuiMinCols || 3);
+        this._minGridRows = Math.max(2, settings.samuiMinRows || 3);
+        this._maxGridCols = Math.min(8, settings.samuiMaxCols || 6);
+        this._maxGridRows = Math.min(10, settings.samuiMaxRows || 7);
+        this._level       = 1;
+        this._unlocked    = false;
+        this._running     = true;
+        this._phase       = 'idle';
+        this._roundObjs   = [];
 
         this._startRound();
     }
@@ -85,15 +121,22 @@ class SamuiBeachGame extends Phaser.Scene {
 
         scene._buildBackground();
 
-        // Compute how many spots are visible this level (+2 each round, starting from base)
-        var baseSpots    = Math.max(this._minShells + 3, 6);
-        var extraSpots   = (this._level - 1) * 2;
-        var numVisible   = Math.min(SAMUI_SPOTS.length, baseSpots + extraSpots);
-        scene._spots     = SAMUI_SPOTS.slice(0, numVisible);
+        // Compute grid dimensions for this level
+        var grid = _samuiGridAt(scene._level,
+            scene._minGridCols, scene._minGridRows,
+            scene._maxGridCols, scene._maxGridRows);
+        scene._spots = _samuiSpots(grid.cols, grid.rows);
 
-        // Number of hidden shells this round (grows with level, capped at max)
-        var numShells = Math.min(scene._maxShells,
-            Math.max(scene._minShells, scene._minShells + Math.floor((scene._level - 1) / 2)));
+        // Hole radius scales with cell size so holes don't overlap
+        var cellW = (GAME_WIDTH - 40) / grid.cols;
+        var cellH = Math.round(GAME_HEIGHT * 0.47) / grid.rows;
+        scene._holeR = Math.max(10, Math.min(22, Math.floor(Math.min(cellW, cellH) * 0.38)));
+
+        // Number of hidden shells this round (grows with level, capped at spot count)
+        var numShells = Math.min(
+            scene._maxShells,
+            Math.min(scene._spots.length, Math.max(scene._minShells, scene._minShells + Math.floor((scene._level - 1) / 2)))
+        );
         var shuffled  = Phaser.Utils.Array.Shuffle(scene._spots.slice());
         scene._answers = shuffled.slice(0, numShells);
         scene._remaining = numShells;
@@ -103,15 +146,16 @@ class SamuiBeachGame extends Phaser.Scene {
         var holeGfx = scene.add.graphics();
         scene._roundObjs.push(holeGfx);
         holeGfx.fillStyle(0xC4A882, 0.65);
-        scene._spots.forEach(function (h) { holeGfx.fillCircle(h.x, h.y, 22); });
+        scene._spots.forEach(function (h) { holeGfx.fillCircle(h.x, h.y, scene._holeR); });
 
         // Show status + shells
         var showMs = Math.max(1200, 3000 - (scene._level - 1) * 100);
         scene._statusText.setText('Onthoud de ' + numShells + ' schelpen! (' + (showMs / 1000).toFixed(1) + 's)');
         scene._statusText.setColor('#E8A020');
 
+        var shellFontSize = Math.max(16, Math.min(36, scene._holeR * 2 - 4)) + 'px';
         scene._answers.forEach(function (pos) {
-            var s = scene.add.text(pos.x, pos.y, '🐚', { fontSize: '36px' }).setOrigin(0.5);
+            var s = scene.add.text(pos.x, pos.y, '🐚', { fontSize: shellFontSize }).setOrigin(0.5);
             scene._roundObjs.push(s);
         });
 
@@ -126,7 +170,7 @@ class SamuiBeachGame extends Phaser.Scene {
             var hGfx = scene.add.graphics();
             scene._roundObjs.push(hGfx);
             hGfx.fillStyle(0xC4A882, 0.65);
-            scene._spots.forEach(function (h) { hGfx.fillCircle(h.x, h.y, 22); });
+            scene._spots.forEach(function (h) { hGfx.fillCircle(h.x, h.y, scene._holeR); });
 
             scene._statusText.setText('Waar waren de schelpen?  0 / ' + numShells + ' gevonden');
             scene._statusText.setColor('#00CFA0');
@@ -137,8 +181,9 @@ class SamuiBeachGame extends Phaser.Scene {
 
     _setupTaps() {
         var scene = this;
+        var zoneSize = Math.max(40, scene._holeR * 2 + 8);
         scene._tapZones = scene._spots.map(function (pos) {
-            var z = scene.add.zone(pos.x, pos.y, 50, 50).setInteractive();
+            var z = scene.add.zone(pos.x, pos.y, zoneSize, zoneSize).setInteractive();
             z.on('pointerdown', function () { scene._onTap(pos, z); });
             scene._roundObjs.push(z);
             return z;
@@ -154,7 +199,8 @@ class SamuiBeachGame extends Phaser.Scene {
 
         if (isCorrect) {
             SFX.correct();
-            var shell = scene.add.text(pos.x, pos.y, '🐚', { fontSize: '36px' }).setOrigin(0.5);
+            var shellFs = Math.max(16, Math.min(36, scene._holeR * 2 - 4)) + 'px';
+            var shell = scene.add.text(pos.x, pos.y, '🐚', { fontSize: shellFs }).setOrigin(0.5);
             scene._roundObjs.push(shell);
             scene.tweens.add({ targets: shell, scaleX: 1.3, scaleY: 1.3, duration: 120, yoyo: true });
             scene._remaining--;
@@ -167,7 +213,8 @@ class SamuiBeachGame extends Phaser.Scene {
             }
         } else {
             SFX.wrong();
-            var cross = scene.add.text(pos.x, pos.y, '❌', { fontSize: '28px' }).setOrigin(0.5);
+            var crossFs = Math.max(14, Math.min(28, scene._holeR * 2 - 6)) + 'px';
+            var cross = scene.add.text(pos.x, pos.y, '❌', { fontSize: crossFs }).setOrigin(0.5);
             scene._roundObjs.push(cross);
             // Reveal the correct positions briefly
             scene._answers.forEach(function (a) {
@@ -175,8 +222,9 @@ class SamuiBeachGame extends Phaser.Scene {
                     return o.x === a.x && o.y === a.y && o.text === '🐚';
                 });
                 if (!already) {
+                    var hintFs = Math.max(16, Math.min(36, scene._holeR * 2 - 4)) + 'px';
                     var hint = scene.add.text(a.x, a.y, '🐚', {
-                        fontSize: '36px', alpha: 0.5
+                        fontSize: hintFs, alpha: 0.5
                     }).setOrigin(0.5);
                     scene._roundObjs.push(hint);
                 }

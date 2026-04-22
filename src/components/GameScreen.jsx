@@ -6,7 +6,7 @@ const VACATION_SCENE_KEYS = [
   'KhaoSokPuzzle', 'LakeRaftGame', 'SamuiBeachGame', 'BangkokFinalGame',
 ]
 
-const BONUS_SCENE_KEYS = ['TetrisGame', 'LevelDevilGame']
+const BONUS_SCENE_KEYS = ['TetrisGame', 'LevelDevilGame', 'PongGame', 'TempelPortaalGame']
 
 const ALL_SCENE_KEYS = [...VACATION_SCENE_KEYS, ...BONUS_SCENE_KEYS]
 
@@ -31,6 +31,7 @@ export function GameScreen({ locationIndex, bonusScene, saveData, onReturn }) {
         width: 390,
         height: 844,
         backgroundColor: '#1A0A00',
+        render: { premultipliedAlpha: false },
         parent: containerRef.current,
         roundPixels: true,
         resolution: window.devicePixelRatio || 1,

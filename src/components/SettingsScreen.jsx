@@ -32,6 +32,21 @@ function RadioGroup({ label, value, options, onChange }) {
   )
 }
 
+function SliderSetting({ label, min, max, step, value, onChange }) {
+  return (
+    <div style={{ marginBottom: '10px' }}>
+      <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '6px' }}>{label}</div>
+      <input
+        type="range"
+        min={min} max={max} step={step}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{ width: '100%', accentColor: '#E8A020' }}
+      />
+    </div>
+  )
+}
+
 export function SettingsScreen({ save, onBack, onSaveChanged }) {
   const [settings, setSettings] = useState({})
   const [resetMsg, setResetMsg] = useState('')
@@ -231,6 +246,61 @@ export function SettingsScreen({ save, onBack, onSaveChanged }) {
               { value: 'fast', label: 'Snel' },
             ]}
             onChange={v => updateSetting('templeSpeed', v)}
+          />
+        </section>
+
+        {/* Pong settings */}
+        <section style={{ marginTop: '24px' }}>
+          <h3 style={{ color: '#E8A020', marginBottom: '12px' }}>🥥 Strand Pong</h3>
+
+          <RadioGroup
+            label="Bal basissnelheid"
+            value={String(settings.pongBaseSpeed || '220')}
+            options={[
+              { value: '150', label: 'Langzaam' },
+              { value: '220', label: 'Normaal' },
+              { value: '300', label: 'Snel' },
+            ]}
+            onChange={v => updateSetting('pongBaseSpeed', Number(v))}
+          />
+
+          <RadioGroup
+            label="Maximale snelheid (× basissnelheid)"
+            value={String(settings.pongMaxSpeedFactor || '2')}
+            options={[
+              { value: '1.5', label: '1.5×' },
+              { value: '2',   label: '2×' },
+              { value: '3',   label: '3×' },
+            ]}
+            onChange={v => updateSetting('pongMaxSpeedFactor', Number(v))}
+          />
+
+        </section>
+
+        {/* Tempel Portaal settings */}
+        <section style={{ marginTop: '24px' }}>
+          <h3 style={{ color: '#E8A020', marginBottom: '12px' }}>🔢 Tempel Portaal</h3>
+
+          <RadioGroup
+            label="Beginsnelheid portalen"
+            value={String(settings.tempelMinSpeed || '180')}
+            options={[
+              { value: '120', label: 'Langzaam' },
+              { value: '180', label: 'Normaal' },
+              { value: '240', label: 'Snel' },
+            ]}
+            onChange={v => updateSetting('tempelMinSpeed', Number(v))}
+          />
+
+          <RadioGroup
+            label="Maximale snelheid portalen"
+            value={String(settings.tempelMaxSpeed || '380')}
+            options={[
+              { value: '280', label: 'Matig' },
+              { value: '380', label: 'Normaal' },
+              { value: '480', label: 'Snel' },
+            ]}
+            onChange={v => updateSetting('tempelMaxSpeed', Number(v))}
           />
         </section>
       </div>

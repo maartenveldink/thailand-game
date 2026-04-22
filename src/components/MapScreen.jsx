@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Star, BookOpen, Gamepad2 } from 'lucide-react'
+import { Star, Gamepad2 } from 'lucide-react'
 import { ThailandMap } from './ThailandMap'
 import { StoryDrawer } from './StoryDrawer'
 import { LOCATIONS } from '../data/locations'
@@ -21,73 +21,45 @@ export function MapScreen({ save, onPlay, onGamesMenu, onSettings, onBeheer, onS
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
       {/* Header */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 16px 10px',
         background: 'linear-gradient(180deg, rgba(1,87,155,0.95) 0%, rgba(13,27,75,0.9) 100%)',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
-        flexShrink: 0,
-        zIndex: 5,
+        flexShrink: 0, zIndex: 5,
+        padding: '12px 16px 10px',
+        display: 'flex', flexDirection: 'column', gap: '10px',
       }}>
-        <div>
-          <div style={{ fontSize: '19px', color: '#E8A020', fontFamily: 'Georgia', fontWeight: 700 }}>
-            🇹🇭 Thailand Avontuur
+        {/* Row 1: title + stars */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '20px', color: '#E8A020', fontFamily: 'Georgia', fontWeight: 700 }}>
+            🌴 Thailand Avontuur
           </div>
-          <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', fontFamily: 'Arial, sans-serif' }}>
-            Thailand Avontuur
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#FFD700' }}>
+            <Star size={18} fill="#FFD700" />
+            <span style={{ fontWeight: 700, fontSize: '18px' }}>{save.totalStars}</span>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'right', gap: '10px' }}>
+
+        {/* Row 2: player + action icons */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* Player switcher — left */}
           <button
             onClick={onSwitchPlayer}
             aria-label="Wissel van speler"
-            title={save?.playerName}
             style={{
-              background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: '8px',
-              color: '#fff', padding: '6px 10px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px',
-              maxWidth: '90px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '20px', color: '#fff', padding: '5px 12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px',
+              fontFamily: 'Arial, sans-serif',
+              maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}
           >
-            👤 {save?.playerName || '?'}
+            👤 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{save?.playerName || '?'}</span>
           </button>
-          <button
-            onClick={onGamesMenu}
-            aria-label="Alle Spellen"
-            style={{
-              background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: '8px',
-              color: '#fff', padding: '6px 10px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px',
-            }}
-          >
-            <Gamepad2 size={16} /> Spellen
-          </button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'right', gap: '10px' }}>
-          <button
-            onClick={onSettings}
-            aria-label="Instellingen"
-            style={{
-              background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: '8px',
-              color: '#fff', padding: '6px 10px', cursor: 'pointer', fontSize: '16px',
-            }}
-          >
-            ⚙️
-          </button>
-          {isBeheer && (
-            <button
-              onClick={onBeheer}
-              aria-label="Beheer"
-              style={{
-                background: 'rgba(255,100,0,0.25)', border: 'none', borderRadius: '8px',
-                color: '#fff', padding: '6px 10px', cursor: 'pointer', fontSize: '13px',
-              }}
-            >
-              🛠️
-            </button>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#FFD700' }}>
-            <Star size={20} fill="#FFD700" />
-            <span style={{ fontWeight: 700, fontSize: '20px' }}>{save.totalStars}</span>
+
+          {/* Action icons — right */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <IconBtn onClick={onGamesMenu} label="Alle Spellen" icon={<Gamepad2 size={18} />} />
+            <IconBtn onClick={onSettings} label="Instellingen" icon="⚙️" />
+            {isBeheer && <IconBtn onClick={onBeheer} label="Beheer" icon="🛠️" accent />}
           </div>
         </div>
       </div>
@@ -116,6 +88,25 @@ export function MapScreen({ save, onPlay, onGamesMenu, onSettings, onBeheer, onS
         </div>
       )}
     </div>
+  )
+}
+
+function IconBtn({ onClick, label, icon, accent }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={label}
+      style={{
+        background: accent ? 'rgba(255,100,0,0.28)' : 'rgba(255,255,255,0.12)',
+        border: '1px solid ' + (accent ? 'rgba(255,130,0,0.4)' : 'rgba(255,255,255,0.15)'),
+        borderRadius: '10px',
+        color: '#fff', padding: '6px 10px', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '18px', lineHeight: 1,
+      }}
+    >
+      {icon}
+    </button>
   )
 }
 

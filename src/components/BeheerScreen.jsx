@@ -12,6 +12,9 @@ export function BeheerScreen({ save, onBack, onSaveChanged }) {
     try { return JSON.parse(localStorage.getItem('thailand_players') || '[]') }
     catch { return [] }
   })
+  const [bahtRate, setBahtRate] = useState(() => {
+    return window.loadSettings?.().bahtRate ?? 38.5
+  })
 
   const handleComplete = (idx) => {
     if (window.completeLocation) {
@@ -96,6 +99,34 @@ export function BeheerScreen({ save, onBack, onSaveChanged }) {
             </div>
           )
         })}
+
+        {/* Baht exchange rate */}
+        <h3 style={{ color: '#E8A020', marginTop: '28px', marginBottom: '8px' }}>💱 Wisselkoers</h3>
+        <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '10px' }}>
+          Koers voor de Baht Rekenmachine (1 EUR = ? THB)
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>€1 =</span>
+          <input
+            type="number"
+            min="1" max="100" step="0.1"
+            value={bahtRate}
+            onChange={e => {
+              const val = parseFloat(e.target.value) || 38.5
+              setBahtRate(val)
+              const s = window.loadSettings?.() ?? {}
+              window.writeSettings?.({ ...s, bahtRate: val })
+            }}
+            style={{
+              width: '90px', padding: '8px 10px', borderRadius: '8px',
+              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'rgba(255,255,255,0.1)',
+              color: '#fff', fontSize: '16px', fontFamily: 'Arial, sans-serif',
+              outline: 'none',
+            }}
+          />
+          <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)' }}>฿</span>
+        </div>
 
         {/* All players — delete */}
         {players.length > 0 && (

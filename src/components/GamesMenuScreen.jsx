@@ -1,12 +1,24 @@
 import { Star, Lock, ChevronLeft } from 'lucide-react'
 import { LOCATIONS } from '../data/locations'
 
+const REISTOOLS = [
+  { key: 'baht',                  label: 'Baht Rekenmachine',   emoji: '💱', desc: 'Hoeveel is jouw euro waard in Baht?' },
+  { key: 'woordenboek',           label: 'Woordenboek',          img: '/img/flag.png',  desc: 'Leer Thaise woorden met flip-kaartjes' },
+  { key: 'dagboek',               label: 'Reisdagboek',          emoji: '📖', desc: 'Schrijf je herinneringen per plek op' },
+  { key: 'dagelijkse-uitdaging',  label: 'Dagelijkse Uitdaging', emoji: '📅', desc: 'Elke dag een nieuwe puzzel!' },
+  { key: 'scorebord',             label: 'Scorebord',            emoji: '🏆', desc: 'Wie staat er voor?' },
+  { key: 'foto-sticker-frame',    label: 'Foto Stickerframe',    emoji: '🖼️', desc: 'Plak een Thais frame om jouw foto!' },
+]
+
 const BONUS_GAMES = [
   { key: 'TetrisGame',     label: 'Thailand Tetris',  emoji: '🏯', desc: 'Klassieke Tetris met Thaise kleuren' },
   { key: 'LevelDevilGame', label: 'Tempel Tocht',     emoji: '🛕', desc: 'Tap om te springen door 5 tempelniveaus' },
+  { key: 'PongGame',       label: 'Strand Pong',      emoji: '🥥', desc: 'Pong met een kokosnoot op het strand' },
+  { key: 'TempelPortaalGame', label: 'Tempel Portaal', emoji: '🔢', desc: 'Reken je weg door de Thaise tempel!' },
 ]
 
-export function GamesMenuScreen({ save, onPlay, onPlayBonus, onSchilder, onBack }) {
+export function GamesMenuScreen({ save, onPlay, onPlayBonus, onSchilder, onBingo, onBaht, onWoordenboek, onDagboek, onDagelijkseUitdaging, onScorebord, onFotoStickerFrame, onBack }) {
+  const reistoolHandlers = { bingo: onBingo, baht: onBaht, woordenboek: onWoordenboek, dagboek: onDagboek, 'dagelijkse-uitdaging': onDagelijkseUitdaging, scorebord: onScorebord, 'foto-sticker-frame': onFotoStickerFrame }
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', height: '100%',
@@ -93,6 +105,26 @@ export function GamesMenuScreen({ save, onPlay, onPlayBonus, onSchilder, onBack 
             🎮 Extra Spellen
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* Bingo */}
+            <button
+              onClick={onBingo}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '12px',
+                background: 'rgba(232,160,32,0.15)',
+                border: '1px solid rgba(232,160,32,0.3)',
+                borderRadius: '12px', padding: '12px 14px',
+                cursor: 'pointer', textAlign: 'left', color: '#fff',
+                transition: 'background 0.15s',
+              }}
+            >
+              <span style={{ fontSize: '28px' }}>🎯</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: 'Georgia', fontSize: '15px', marginBottom: '2px' }}>Thailand Bingo</div>
+                <div style={{ fontSize: '12px', opacity: 0.65, fontFamily: 'Arial, sans-serif' }}>Spiek wat je al gezien hebt op vakantie</div>
+              </div>
+              <span style={{ fontSize: '12px', color: '#E8A020', fontFamily: 'Arial' }}>Speel!</span>
+            </button>
+
             {BONUS_GAMES.map((bg) => (
               <button
                 key={bg.key}
@@ -134,6 +166,41 @@ export function GamesMenuScreen({ save, onPlay, onPlayBonus, onSchilder, onBack 
               </div>
               <span style={{ fontSize: '12px', color: '#E8A020', fontFamily: 'Arial' }}>Speel!</span>
             </button>
+          </div>
+        </section>
+
+        {/* Reistools */}
+        <section>
+          <div style={{
+            fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontFamily: 'Arial, sans-serif',
+            textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px',
+          }}>
+            🧳 Reistools
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {REISTOOLS.map((tool) => (
+              <button
+                key={tool.key}
+                onClick={() => reistoolHandlers[tool.key]?.()}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  background: 'rgba(255,255,255,0.07)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '12px', padding: '12px 14px',
+                  cursor: 'pointer', textAlign: 'left', color: '#fff',
+                  transition: 'background 0.15s',
+                }}
+              >
+                {tool.img
+                  ? <img src={tool.img} style={{ width: 28, height: 28, objectFit: 'contain' }} alt="" />
+                  : <span style={{ fontSize: '28px' }}>{tool.emoji}</span>}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: 'Georgia', fontSize: '15px', marginBottom: '2px' }}>{tool.label}</div>
+                  <div style={{ fontSize: '12px', opacity: 0.65, fontFamily: 'Arial, sans-serif' }}>{tool.desc}</div>
+                </div>
+                <span style={{ fontSize: '12px', color: '#E8A020', fontFamily: 'Arial' }}>Open</span>
+              </button>
+            ))}
           </div>
         </section>
       </div>

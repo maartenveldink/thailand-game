@@ -115,13 +115,18 @@ function setHighscore(locationId, score) {
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 
+function _settingsKey() {
+    var active = getActivePlayer();
+    return active ? SETTINGS_KEY + '_' + active : SETTINGS_KEY;
+}
+
 function loadSettings() {
-    try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; }
+    try { return JSON.parse(localStorage.getItem(_settingsKey())) || {}; }
     catch (e) { return {}; }
 }
 
 function writeSettings(s) {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+    localStorage.setItem(_settingsKey(), JSON.stringify(s));
 }
 
 function resetGame(locationIndex) {

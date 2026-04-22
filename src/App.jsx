@@ -6,6 +6,13 @@ import { SettingsScreen } from './components/SettingsScreen'
 import { BeheerScreen } from './components/BeheerScreen'
 import { PlayerSelectScreen } from './components/PlayerSelectScreen'
 import { SchilderScreen } from './components/SchilderScreen'
+import { BingoScreen } from './components/BingoScreen'
+import { BahtScreen } from './components/BahtScreen'
+import { WoordenboekScreen } from './components/WoordenboekScreen'
+import { DagboekScreen } from './components/DagboekScreen'
+import DagelijkseUitdagingScreen from './components/DagelijkseUitdagingScreen'
+import ScorebordScreen from './components/ScorebordScreen'
+import FotoStickerFrameScreen from './components/FotoStickerFrameScreen'
 
 const isBeheer = new URLSearchParams(window.location.search).get('beheer') === 'true'
 
@@ -51,35 +58,25 @@ export function App() {
     const params = new URLSearchParams(window.location.search)
     const unlockAll = params.get('unlock') === 'all'
 
-    if (unlockAll) {
-      // Test / dev shortcut — create a fixed player and unlock all locations
-      const name = 'Speler 1'
-      localStorage.setItem('thailand_active', name)
-      const existing = readPlayerSave(name)
-      const locations = [
-        { id: 'bangkok',      unlocked: true, completed: false, stars: 0 },
-        { id: 'kanchanaburi', unlocked: true, completed: false, stars: 0 },
-        { id: 'nachttrein',   unlocked: true, completed: false, stars: 0 },
-        { id: 'khaosok',      unlocked: true, completed: false, stars: 0 },
-        { id: 'cheowlan',     unlocked: true, completed: false, stars: 0 },
-        { id: 'samui',        unlocked: true, completed: false, stars: 0 },
-        { id: 'terugbangkok', unlocked: true, completed: false, stars: 0 },
-      ]
-      const data = existing
-        ? { ...existing, locations: existing.locations.map(loc => ({ ...loc, unlocked: true })) }
-        : { version: 1, playerName: name, locations, totalStars: 0, lastPlayed: Date.now() }
-      localStorage.setItem('thailand_save_' + name, JSON.stringify(data))
-      // Keep legacy key in sync so Phaser save.js picks it up via getSaveKey()
+    const active = localStorage.getItem('thailand_active')
+    const existing = active ? readPlayerSave(active) : null
+
+    if (unlockAll && existing) {
+      // Dev shortcut — unlock all locations for the current player
+      const data = { ...existing, locations: existing.locations.map(loc => ({ ...loc, unlocked: true })) }
+      localStorage.setItem('thailand_save_' + active, JSON.stringify(data))
       setSave(data)
       setScreen('map')
       return
     }
 
-    const active = localStorage.getItem('thailand_active')
-    if (active) {
-      const data = readPlayerSave(active)
-      if (data) { setSave(data); setScreen('map'); return }
+    if (!unlockAll && existing) {
+      setSave(existing)
+      setScreen('map')
+      return
     }
+
+    // No active player (or ?unlock=all without an existing player) → player select
     setScreen('players')
   }, [])
 
@@ -168,6 +165,20 @@ export function App() {
     )
   } else if (screen === 'schilder') {
     content = <SchilderScreen onBack={() => setScreen('gamesmenu')} />
+  } else if (screen === 'bingo') {
+    content = <BingoScreen onBack={() => setScreen('gamesmenu')} />
+  } else if (screen === 'baht') {
+    content = <BahtScreen onBack={() => setScreen('gamesmenu')} />
+  } else if (screen === 'woordenboek') {
+    content = <WoordenboekScreen onBack={() => setScreen('gamesmenu')} />
+  } else if (screen === 'dagboek') {
+    content = <DagboekScreen onBack={() => setScreen('gamesmenu')} />
+  } else if (screen === 'dagelijkse-uitdaging') {
+    content = <DagelijkseUitdagingScreen onBack={() => setScreen('gamesmenu')} />
+  } else if (screen === 'scorebord') {
+    content = <ScorebordScreen onBack={() => setScreen('gamesmenu')} />
+  } else if (screen === 'foto-sticker-frame') {
+    content = <FotoStickerFrameScreen onBack={() => setScreen('gamesmenu')} />
   } else if (screen === 'gamesmenu') {
     content = (
       <GamesMenuScreen
@@ -175,6 +186,13 @@ export function App() {
         onPlay={handlePlayFromMenu}
         onPlayBonus={handlePlayBonus}
         onSchilder={() => setScreen('schilder')}
+        onBingo={() => setScreen('bingo')}
+        onBaht={() => setScreen('baht')}
+        onWoordenboek={() => setScreen('woordenboek')}
+        onDagboek={() => setScreen('dagboek')}
+        onDagelijkseUitdaging={() => setScreen('dagelijkse-uitdaging')}
+        onScorebord={() => setScreen('scorebord')}
+        onFotoStickerFrame={() => setScreen('foto-sticker-frame')}
         onBack={() => setScreen('map')}
       />
     )
