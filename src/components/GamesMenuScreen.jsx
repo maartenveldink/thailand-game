@@ -8,6 +8,7 @@ const REISTOOLS = [
   { key: 'dagelijkse-uitdaging',  label: 'Dagelijkse Uitdaging', emoji: '📅', desc: 'Elke dag een nieuwe puzzel!' },
   { key: 'scorebord',             label: 'Scorebord',            emoji: '🏆', desc: 'Wie staat er voor?' },
   { key: 'foto-sticker-frame',    label: 'Foto Stickerframe',    emoji: '🖼️', desc: 'Plak een Thais frame om jouw foto!' },
+  { key: 'trivia',                label: 'Thailand Trivia',       emoji: '📚', desc: 'Weetjes over cultuur, natuur en meer!' },
 ]
 
 const BONUS_GAMES = [
@@ -17,8 +18,8 @@ const BONUS_GAMES = [
   { key: 'TempelPortaalGame', label: 'Tempel Portaal', emoji: '🔢', desc: 'Reken je weg door de Thaise tempel!' },
 ]
 
-export function GamesMenuScreen({ save, onPlay, onPlayBonus, onSchilder, onBingo, onBaht, onWoordenboek, onDagboek, onDagelijkseUitdaging, onScorebord, onFotoStickerFrame, onBack }) {
-  const reistoolHandlers = { bingo: onBingo, baht: onBaht, woordenboek: onWoordenboek, dagboek: onDagboek, 'dagelijkse-uitdaging': onDagelijkseUitdaging, scorebord: onScorebord, 'foto-sticker-frame': onFotoStickerFrame }
+export function GamesMenuScreen({ save, onPlay, onPlayBonus, onSchilder, onBingo, onBaht, onWoordenboek, onDagboek, onDagelijkseUitdaging, onScorebord, onFotoStickerFrame, onTrivia, onBack }) {
+  const reistoolHandlers = { bingo: onBingo, baht: onBaht, woordenboek: onWoordenboek, dagboek: onDagboek, 'dagelijkse-uitdaging': onDagelijkseUitdaging, scorebord: onScorebord, 'foto-sticker-frame': onFotoStickerFrame, trivia: onTrivia }
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', height: '100%',

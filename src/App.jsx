@@ -13,6 +13,7 @@ import { DagboekScreen } from './components/DagboekScreen'
 import DagelijkseUitdagingScreen from './components/DagelijkseUitdagingScreen'
 import ScorebordScreen from './components/ScorebordScreen'
 import FotoStickerFrameScreen from './components/FotoStickerFrameScreen'
+import TriviaScreen from './components/TriviaScreen'
 
 const isBeheer = new URLSearchParams(window.location.search).get('beheer') === 'true'
 
@@ -179,6 +180,8 @@ export function App() {
     content = <ScorebordScreen onBack={() => setScreen('gamesmenu')} />
   } else if (screen === 'foto-sticker-frame') {
     content = <FotoStickerFrameScreen onBack={() => setScreen('gamesmenu')} />
+  } else if (screen === 'trivia') {
+    content = <TriviaScreen onBack={() => setScreen('gamesmenu')} />
   } else if (screen === 'gamesmenu') {
     content = (
       <GamesMenuScreen
@@ -193,6 +196,7 @@ export function App() {
         onDagelijkseUitdaging={() => setScreen('dagelijkse-uitdaging')}
         onScorebord={() => setScreen('scorebord')}
         onFotoStickerFrame={() => setScreen('foto-sticker-frame')}
+        onTrivia={() => setScreen('trivia')}
         onBack={() => setScreen('map')}
       />
     )
