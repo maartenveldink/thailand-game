@@ -47,7 +47,7 @@ function SliderSetting({ label, min, max, step, value, onChange }) {
   )
 }
 
-export function SettingsScreen({ save, onBack, onSaveChanged }) {
+export function SettingsScreen({ save, onBack, onSaveChanged, onBeheer }) {
   const [settings, setSettings] = useState({})
   const [resetMsg, setResetMsg] = useState('')
 
@@ -323,6 +323,16 @@ export function SettingsScreen({ save, onBack, onSaveChanged }) {
             ]}
             onChange={v => updateSetting('tempelMaxSpeed', Number(v))}
           />
+        </section>
+
+        {/* Beheer */}
+        <section style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <button
+            onClick={onBeheer}
+            style={{ ...BTN.base, background: 'rgba(255,100,0,0.2)', color: '#FF9040', border: '1px solid rgba(255,100,0,0.3)' }}
+          >
+            🛠️ Beheerpagina
+          </button>
         </section>
       </div>
     </div>

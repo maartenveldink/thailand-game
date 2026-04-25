@@ -5,7 +5,7 @@ import { StoryDrawer } from './StoryDrawer'
 import { LOCATIONS } from '../data/locations'
 import { TRIVIA_FACTS } from '../data/triviaFacts'
 
-export function MapScreen({ save, onPlay, onGamesMenu, onSettings, onBeheer, onSwitchPlayer, isBeheer }) {
+export function MapScreen({ save, onPlay, onGamesMenu, onSettings, onSwitchPlayer }) {
   const [activeIdx, setActiveIdx] = useState(null)
   const trivia = useMemo(() => TRIVIA_FACTS[Math.floor(Math.random() * TRIVIA_FACTS.length)], [])
   const triviaEnabled = (window.loadSettings?.() ?? {}).triviaOnStart ?? true
@@ -63,7 +63,6 @@ export function MapScreen({ save, onPlay, onGamesMenu, onSettings, onBeheer, onS
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <IconBtn onClick={onGamesMenu} label="Alle Spellen" icon={<Gamepad2 size={18} />} />
             <IconBtn onClick={onSettings} label="Instellingen" icon="⚙️" />
-            {isBeheer && <IconBtn onClick={onBeheer} label="Beheer" icon="🛠️" accent />}
           </div>
         </div>
       </div>

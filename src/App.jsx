@@ -15,8 +15,6 @@ import ScorebordScreen from './components/ScorebordScreen'
 import FotoStickerFrameScreen from './components/FotoStickerFrameScreen'
 import TriviaScreen from './components/TriviaScreen'
 
-const isBeheer = new URLSearchParams(window.location.search).get('beheer') === 'true'
-
 function readPlayerSave(name) {
   try {
     const raw = localStorage.getItem('thailand_save_' + name)
@@ -154,6 +152,10 @@ export function App() {
         save={save}
         onBack={() => setScreen('map')}
         onSaveChanged={handleSaveChanged}
+        onBeheer={() => {
+          const pin = window.prompt('Voer de pincode in:')
+          if (pin === '0610') setScreen('beheer')
+        }}
       />
     )
   } else if (screen === 'beheer') {
@@ -216,9 +218,7 @@ export function App() {
         onPlay={handlePlay}
         onGamesMenu={() => setScreen('gamesmenu')}
         onSettings={() => setScreen('settings')}
-        onBeheer={() => setScreen('beheer')}
         onSwitchPlayer={() => setScreen('players')}
-        isBeheer={isBeheer}
       />
     )
   }
